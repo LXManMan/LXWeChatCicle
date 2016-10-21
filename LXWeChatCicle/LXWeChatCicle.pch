@@ -1,0 +1,52 @@
+//
+//  LXWeChatCicle.pch
+//  LXWeChatCicle
+//
+//  Created by chuanglong02 on 16/10/20.
+//  Copyright © 2016年 漫漫. All rights reserved.
+//
+
+#ifndef LXWeChatCicle_pch
+#define LXWeChatCicle_pch
+
+#define kGAP 10
+#define kThemeColor [UIColor colorWithRed:0 green:(190 / 255.0) blue:(12 / 255.0) alpha:1]
+#define kAvatar_Size 40
+
+#define kTabBarHeight       49
+#define kNavbarHeight       64
+
+#define kAlmostZero         0.0000001
+
+
+
+#import "Masonry.h"
+
+
+#import "UITableViewCell+HYBMasonryAutoCellHeight.h"
+#import "UIImageView+WebCache.h"
+
+#import "YYText.h"
+#import "YYTextView.h"
+#import "YYLabel.h"
+#import "UIView+YYAdd.h"
+#import "CALayer+YYAdd.h"
+#import "UIControl+YYAdd.h"
+
+
+
+#import "PinYin4Objc.h"
+
+#import "YYFPSLabel.h"
+
+#import "MJExtension.h"
+#import "ChatKeyBoardMacroDefine.h"
+#import "LxButton.h"
+#import "UILabel+LXLabel.h"
+#define Device_Height [[UIScreen mainScreen] bounds].size.height
+#define Device_Width  [[UIScreen mainScreen] bounds].size.width
+#define LBColor(r, g, b) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
+#define LBRandomColor LBColor(arc4random_uniform(256), arc4random_uniform(256), arc4random_uniform(256))
+
+
+#endif /* LXWeChatCicle_pch */
