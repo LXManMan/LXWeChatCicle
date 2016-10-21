@@ -243,46 +243,6 @@ static NSString *cellIndentifier = @"cell";
     
 }
 
-#pragma mark keyboardWillShow
-- (void)keyboardWillShow:(NSNotification *)notification
-{
-    NSDictionary *userInfo = [notification userInfo];
-    NSValue* aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-    __block  CGFloat keyboardHeight = [aValue CGRectValue].size.height;
-    if (keyboardHeight==0) {//解决搜狗输入法三次调用此方法的bug、
-        //        IOS8.0之后可以安装第三方键盘，如搜狗输入法之类的。
-        //        获得的高度都为0.这是因为键盘弹出的方法:- (void)keyBoardWillShow:(NSNotification *)notification需要执行三次,你如果打印一下,你会发现键盘高度为:第一次:0;第二次:216:第三次:282.并不是获取不到高度,而是第三次才获取真正的高度.
-        return;
-    }
-    CGRect keyboardRect = [aValue CGRectValue];
-    keyboardRect = [self.view convertRect:keyboardRect fromView:nil];
-    CGFloat keyboardTop = keyboardRect.origin.y;
-    CGRect newTextViewFrame = self.view.bounds;
-    newTextViewFrame.size.height = keyboardTop - self.view.bounds.origin.y;
-    
-    NSValue *animationDurationValue = [userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey];
-    NSTimeInterval animationDuration;
-    [animationDurationValue getValue:&animationDuration];
-    CGFloat delta = 0.0;
-    if (self.seletedCellHeight){//点击某行，进行回复某人
-        delta = self.history_Y_offset - ([UIApplication sharedApplication].keyWindow.bounds.size.height - keyboardHeight-self.seletedCellHeight-kChatToolBarHeight);
-    }else{//点击评论按钮
-        delta = self.history_Y_offset - ([UIApplication sharedApplication].keyWindow.bounds.size.height - keyboardHeight-kChatToolBarHeight-24-10);//24为评论按钮高度，10为评论按钮上部的5加评论按钮下部的5
-    }
-    CGPoint offset = self.commentTableview.contentOffset;
-    offset.y += delta;
-    if (offset.y < 0) {
-        offset.y = 0;
-    }
-    if (self.needUpdateOffset) {
-        [self.commentTableview setContentOffset:offset animated:YES];
-    }
-}
-
-- (void)keyboardWillHide:(NSNotification *)notification {
-    
-    self.needUpdateOffset = NO;
-}
 -(void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     NSLog(@"CommentViewController dealloc");
