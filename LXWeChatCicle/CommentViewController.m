@@ -32,23 +32,24 @@ static NSString *cellIndentifier = @"cell";
 {
     self = [super init];
     if (self) {
-        //注册键盘出现NSNotification
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(keyboardWillShow:)
-                                                     name:UIKeyboardWillShowNotification object:nil];
-        
-        
-        //注册键盘隐藏NSNotification
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(keyboardWillHide:)
-                                                     name:UIKeyboardWillHideNotification object:nil];
+        //        //注册键盘出现NSNotification
+        //        [[NSNotificationCenter defaultCenter] addObserver:self
+        //                                                 selector:@selector(keyboardWillShow:)
+        //                                                     name:UIKeyboardWillShowNotification object:nil];
+        //
+        //
+        //        //注册键盘隐藏NSNotification
+        //        [[NSNotificationCenter defaultCenter] addObserver:self
+        //                                                 selector:@selector(keyboardWillHide:)
+        //                                                     name:UIKeyboardWillHideNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChangeFrame:) name:UIKeyboardWillChangeFrameNotification object:nil];
     }
     return self;
 }
 - (NSArray<ChatToolBarItem *> *)chatKeyBoardToolbarItems
 {
     ChatToolBarItem *item1 = [ChatToolBarItem barItemWithKind:kBarItemFace normal:@"face" high:@"face_HL" select:@"keyboard"];
-       return @[item1];
+    return @[item1];
 }
 - (NSArray<FaceThemeModel *> *)chatKeyBoardFacePanelSubjectItems
 {
@@ -72,23 +73,23 @@ static NSString *cellIndentifier = @"cell";
     return _chatKeyBoard;
 }
 - (void)chatKeyBoardSendText:(NSString *)text{
-//    MessageModel *messageModel = [self.dataSource objectAtIndex:self.currentIndexPath.row];
-//    messageModel.shouldUpdateCache = YES;
-//    
-//    //创建一个新的CommentModel,并给相应的属性赋值，然后加到评论数组的最后，reloadData
-//    CommentModel *commentModel = [[CommentModel alloc]init];
-//    commentModel.commentUserName = @"文明";
-//    commentModel.commentUserId = @"274";
-//    commentModel.commentPhoto = @"http://q.qlogo.cn/qqapp/1104706859/189AA89FAADD207E76D066059F924AE0/100";
-//    commentModel.commentByUserName = self.replayTheSeletedCellModel?self.replayTheSeletedCellModel.commentUserName:@"";
-//    commentModel.commentId = [NSString stringWithFormat:@"%i",[self getRandomNumber:100 to:1000]];
-//    commentModel.commentText = text;
-//    [messageModel.commentModelArray addObject:commentModel];
-//    
-//    messageModel.shouldUpdateCache = YES;
-//    [self reloadCellHeightForModel:messageModel atIndexPath:self.currentIndexPath];
-//    [self.chatKeyBoard keyboardDownForComment];
-//    self.chatKeyBoard.placeHolder = nil;
+    //    MessageModel *messageModel = [self.dataSource objectAtIndex:self.currentIndexPath.row];
+    //    messageModel.shouldUpdateCache = YES;
+    //
+    //    //创建一个新的CommentModel,并给相应的属性赋值，然后加到评论数组的最后，reloadData
+    //    CommentModel *commentModel = [[CommentModel alloc]init];
+    //    commentModel.commentUserName = @"文明";
+    //    commentModel.commentUserId = @"274";
+    //    commentModel.commentPhoto = @"http://q.qlogo.cn/qqapp/1104706859/189AA89FAADD207E76D066059F924AE0/100";
+    //    commentModel.commentByUserName = self.replayTheSeletedCellModel?self.replayTheSeletedCellModel.commentUserName:@"";
+    //    commentModel.commentId = [NSString stringWithFormat:@"%i",[self getRandomNumber:100 to:1000]];
+    //    commentModel.commentText = text;
+    //    [messageModel.commentModelArray addObject:commentModel];
+    //
+    //    messageModel.shouldUpdateCache = YES;
+    //    [self reloadCellHeightForModel:messageModel atIndexPath:self.currentIndexPath];
+    //    [self.chatKeyBoard keyboardDownForComment];
+    //    self.chatKeyBoard.placeHolder = nil;
 }
 - (void)chatKeyBoardFacePicked:(ChatKeyBoard *)chatKeyBoard faceStyle:(NSInteger)faceStyle faceName:(NSString *)faceName delete:(BOOL)isDeleteKey{
     NSLog(@"%@",faceName);
@@ -102,7 +103,7 @@ static NSString *cellIndentifier = @"cell";
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     self.navigationItem.title = @"朋友圈";
     self.navigationItem.rightBarButtonItem =[[UIBarButtonItem alloc]initWithCustomView:[[YYFPSLabel alloc]initWithFrame:CGRectMake(0, 5, 60, 30)]];
     self.automaticallyAdjustsScrollViewInsets = NO;
@@ -208,7 +209,39 @@ static NSString *cellIndentifier = @"cell";
     }];
     return h;
 }
-
+-(void)keyboardWillChangeFrame:(NSNotification *)notification
+{
+    NSDictionary *userInfo = notification.userInfo;
+    // 动画的持续时间
+    double duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    // 键盘的frame
+    CGRect keyboardRect = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGFloat keyboardHeight = keyboardRect.size.height;
+    keyboardRect = [self.view convertRect:keyboardRect fromView:nil];
+    CGFloat keyboardTop = keyboardRect.origin.y;
+    CGRect newTextViewFrame = self.view.bounds;
+    newTextViewFrame.size.height = keyboardTop - self.view.bounds.origin.y;
+    
+    NSValue *animationDurationValue = [userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey];
+    NSTimeInterval animationDuration;
+    [animationDurationValue getValue:&animationDuration];
+    CGFloat delta = 0.0;
+    if (self.seletedCellHeight){//点击某行，进行回复某人
+        delta = self.history_Y_offset - ([UIApplication sharedApplication].keyWindow.bounds.size.height - keyboardHeight-self.seletedCellHeight-kChatToolBarHeight);
+    }else{//点击评论按钮
+        delta = self.history_Y_offset - ([UIApplication sharedApplication].keyWindow.bounds.size.height - keyboardHeight-kChatToolBarHeight-24-10);//24为评论按钮高度，10为评论按钮上部的5加评论按钮下部的5
+    }
+    CGPoint offset = self.commentTableview.contentOffset;
+    offset.y += delta;
+    if (offset.y < 0) {
+        offset.y = 0;
+    }
+    if (self.needUpdateOffset) {
+        [self.commentTableview setContentOffset:offset animated:YES];
+    }
+    self.needUpdateOffset = NO;
+    
+}
 
 #pragma mark keyboardWillShow
 - (void)keyboardWillShow:(NSNotification *)notification
@@ -245,8 +278,9 @@ static NSString *cellIndentifier = @"cell";
         [self.commentTableview setContentOffset:offset animated:YES];
     }
 }
-- (void)keyboardWillHide:(NSNotification *)notification {
 
+- (void)keyboardWillHide:(NSNotification *)notification {
+    
     self.needUpdateOffset = NO;
 }
 -(void)dealloc{
